@@ -55,10 +55,12 @@ func calculateAverageLatency(latencies []float64) float64 {
 }
 
 func calculateJitter(latencies []float64) float64 {
+	// Jitter requires at least two latencies
 	if len(latencies) < 2 {
 		return 0.0
 	}
 
+	// Jitter is the average of the absolute difference between latencies
 	var totalJitter float64
 	for i := 1; i < len(latencies); i++ {
 		diff := latencies[i] - latencies[i-1]
