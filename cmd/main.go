@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/iliasgal/network-monitor/pkg/ping"
+	"github.com/iliasgal/network-monitor/pkg/metrics"
 )
 
 func main() {
@@ -12,7 +12,7 @@ func main() {
 	host := "google.com"
 	count := 4
 	for {
-		err := ping.PingHost(host, count)
+		err := metrics.PingHost(host, count)
 		if err != nil {
 			fmt.Println(err)
 			return
