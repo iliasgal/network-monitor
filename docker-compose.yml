@@ -1,16 +1,6 @@
 version: '3.8'
 
 services:
-  app:
-    build: .
-    volumes:
-      - .:/app
-    ports:
-      - "8080:8080"
-    env_file: .env
-    depends_on:
-      - influxdb
-
   influxdb:
     image: influxdb:2.1
     ports:
@@ -19,6 +9,4 @@ services:
       - influxdb_data:/var/lib/influxdb2
 
 volumes:
-  go_cache:
-  go_build:
   influxdb_data:

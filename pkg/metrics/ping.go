@@ -89,6 +89,7 @@ func calculatePacketLoss(output string) (float64, error) {
 	// Regex to extract packet loss percentage from ping output
 	packetLossRegex := regexp.MustCompile(`(\d+)% packet loss`)
 	match := packetLossRegex.FindStringSubmatch(output)
+
 	if len(match) > 1 {
 		packetLoss, err := strconv.ParseFloat(match[1], 64)
 		if err != nil {
