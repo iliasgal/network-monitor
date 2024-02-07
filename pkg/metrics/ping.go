@@ -5,16 +5,12 @@ import (
 	"os/exec"
 	"regexp"
 	"strconv"
+
+	"github.com/iliasgal/network-monitor/pkg/model"
 )
 
-type PingMetrics struct {
-	AvgLatency float64
-	Jitter     float64
-	PacketLoss float64
-}
-
 // PingHost executes the ping command and calculates average latency, packet loss, and jitter.
-func PingHost(host string, count int) (*PingMetrics, error) {
+func PingHost(host string, count int) (*model.PingMetrics, error) {
 	cmd := exec.Command("ping", "-c", fmt.Sprint(count), host)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -34,7 +30,7 @@ func PingHost(host string, count int) (*PingMetrics, error) {
 	}
 
 	// write ping metrics to struct
-	pingMetrics := PingMetrics{
+	pingMetrics := model.PingMetrics{
 		AvgLatency: avgLatency,
 		Jitter:     jitter,
 		PacketLoss: packetLoss,

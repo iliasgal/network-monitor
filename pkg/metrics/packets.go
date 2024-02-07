@@ -1,40 +1,32 @@
 package metrics
 
 import (
-	"fmt"
 	"log"
 	"time"
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
+	"github.com/iliasgal/network-monitor/pkg/db"
+	"github.com/iliasgal/network-monitor/pkg/model"
 )
-
-type PacketInfo struct {
-	PacketType string
-	SrcIP      string
-	DstIP      string
-	SrcPort    string
-	DstPort    string
-	Size       int
-}
 
 // LayerProcessor defines an interface for processing packet layers
 type LayerProcessor interface {
-	Process(packet gopacket.Packet) *PacketInfo
+	Process(packet gopacket.Packet) *model.PacketInfo
 }
 
 // IPv4Processor processes IPv4 layers
 type IPv4Processor struct{}
 
-func (p IPv4Processor) Process(packet gopacket.Packet) *PacketInfo {
+func (p IPv4Processor) Process(packet gopacket.Packet) *model.PacketInfo {
 	ipLayer := packet.Layer(layers.LayerTypeIPv4)
 	if ipLayer == nil {
 		return nil
 	}
 
 	ip, _ := ipLayer.(*layers.IPv4)
-	return &PacketInfo{
+	return &model.PacketInfo{
 		PacketType: "IPv4",
 		SrcIP:      ip.SrcIP.String(),
 		DstIP:      ip.DstIP.String(),
@@ -45,14 +37,14 @@ func (p IPv4Processor) Process(packet gopacket.Packet) *PacketInfo {
 // TCPProcessor processes TCP layers
 type TCPProcessor struct{}
 
-func (p TCPProcessor) Process(packet gopacket.Packet) *PacketInfo {
+func (p TCPProcessor) Process(packet gopacket.Packet) *model.PacketInfo {
 	tcpLayer := packet.Layer(layers.LayerTypeTCP)
 	if tcpLayer == nil {
 		return nil
 	}
 
 	tcp, _ := tcpLayer.(*layers.TCP)
-	return &PacketInfo{
+	return &model.PacketInfo{
 		PacketType: "TCP",
 		SrcPort:    tcp.SrcPort.String(),
 		DstPort:    tcp.DstPort.String(),
@@ -63,13 +55,13 @@ func (p TCPProcessor) Process(packet gopacket.Packet) *PacketInfo {
 // UDPProcessor processes UDP layers
 type UDPProcessor struct{}
 
-func (p UDPProcessor) Process(packet gopacket.Packet) *PacketInfo {
+func (p UDPProcessor) Process(packet gopacket.Packet) *model.PacketInfo {
 	udpLayer := packet.Layer(layers.LayerTypeUDP)
 	if udpLayer == nil {
 		return nil
 	}
 	udp, _ := udpLayer.(*layers.UDP)
-	return &PacketInfo{
+	return &model.PacketInfo{
 		PacketType: "UDP",
 		SrcPort:    udp.SrcPort.String(),
 		DstPort:    udp.DstPort.String(),
@@ -96,11 +88,12 @@ func PacketCapture() {
 		TCPProcessor{},
 		UDPProcessor{},
 	}
+
 	for packet := range packetSource.Packets() {
 		for _, processor := range processors {
 			info := processor.Process(packet)
 			if info != nil {
-				fmt.Printf("Packet: %+v\n", info)
+				go db.WritePacketInfoToInfluxDB(info)
 			}
 		}
 	}
