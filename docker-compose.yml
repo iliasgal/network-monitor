@@ -7,6 +7,7 @@ services:
       - .:/app
     ports:
       - "8080:8080"
+    env_file: .env
     depends_on:
       - influxdb
 
@@ -16,13 +17,6 @@ services:
       - "8086:8086"
     volumes:
       - influxdb_data:/var/lib/influxdb2
-    environment:
-      - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_USERNAME=myuser
-      - DOCKER_INFLUXDB_INIT_PASSWORD=mypassword
-      - DOCKER_INFLUXDB_INIT_ORG=myorg
-      - DOCKER_INFLUXDB_INIT_BUCKET=mybucket
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=myadmintoken
 
 volumes:
   go_cache:

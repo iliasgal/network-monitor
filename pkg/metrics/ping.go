@@ -7,27 +7,40 @@ import (
 	"strconv"
 )
 
+type PingMetrics struct {
+	AvgLatency float64
+	Jitter     float64
+	PacketLoss float64
+}
+
 // PingHost executes the ping command and calculates average latency, packet loss, and jitter.
-func PingHost(host string, count int) error {
+func PingHost(host string, count int) (*PingMetrics, error) {
 	cmd := exec.Command("ping", "-c", fmt.Sprint(count), host)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("failed to execute ping: %s", err)
+		return nil, fmt.Errorf("failed to execute ping: %s", err)
 	}
 
 	latencies, err := extractLatencies(string(output))
 	if err != nil {
-		return fmt.Errorf("failed to extract latencies: %s", err)
+		return nil, fmt.Errorf("failed to extract latencies: %s", err)
 	}
 
 	avgLatency := calculateAverageLatency(latencies)
 	jitter := calculateJitter(latencies)
-	packetLoss := calculatePacketLoss(string(output))
+	packetLoss, err := calculatePacketLoss(string(output))
+	if err != nil {
+		return nil, fmt.Errorf("failed to calculate packet loss: %s", err)
+	}
 
-	fmt.Printf("Average Latency: %.2f ms\n", avgLatency)
-	fmt.Printf("Jitter: %.2f ms\n", jitter)
-	fmt.Printf("Packet Loss: %s%%\n", packetLoss)
-	return nil
+	// write ping metrics to struct
+	pingMetrics := PingMetrics{
+		AvgLatency: avgLatency,
+		Jitter:     jitter,
+		PacketLoss: packetLoss,
+	}
+
+	return &pingMetrics, nil
 }
 
 func extractLatencies(output string) ([]float64, error) {
@@ -72,12 +85,17 @@ func calculateJitter(latencies []float64) float64 {
 	return totalJitter / float64(len(latencies)-1)
 }
 
-func calculatePacketLoss(output string) string {
-	// Regex to extract packet loss from ping output
+func calculatePacketLoss(output string) (float64, error) {
+	// Regex to extract packet loss percentage from ping output
 	packetLossRegex := regexp.MustCompile(`(\d+)% packet loss`)
 	match := packetLossRegex.FindStringSubmatch(output)
 	if len(match) > 1 {
-		return match[1]
+		packetLoss, err := strconv.ParseFloat(match[1], 64)
+		if err != nil {
+			return 0, fmt.Errorf("failed to parse packet loss value: %s", err)
+		}
+		return packetLoss, nil
 	}
-	return "0"
+
+	return 0, nil
 }
