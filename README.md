@@ -2,7 +2,7 @@
 
 ## Overview
 
-Network Monitor is a Go-based tool for capturing and analyzing network traffic, designed for efficiency and compatibility with various platforms, including PCs or Raspberry Pi. It utilises InfluxDB for storing network metrics, providing insights into network performance and health.
+Network Monitor is a Go-based tool for capturing and analysing network traffic, designed for efficiency and compatibility with various platforms, including PCs or Raspberry Pi. It utilises InfluxDB for storing network metrics, providing insights into network performance and health.
 
 ## Features
 
@@ -10,7 +10,7 @@ Network Monitor is a Go-based tool for capturing and analyzing network traffic, 
 - **Performance Metrics**: Measures latency, jitter, and packet loss to assess network health.
 - **Data Aggregation and Visualisation**: Stores metrics in InfluxDB, supporting complex analyses and visualisations with tools like Grafana or directly through the InfluxDB dashboards themselves.
 
-![Network packets by protocol](packets-by-protocol.png)
+![network-monitor.png](images/packets-by-protocol.png)
 
 ## Deployment
 
