@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
@@ -48,7 +47,7 @@ func main() {
 		case err := <-errorChan:
 			log.Printf("Error occurred: %v", err)
 		case <-signals:
-			fmt.Println("Termination signal received, closing resources.")
+			log.Println("Termination signal received, closing resources.")
 			db.CloseInfluxDBClient()
 			ticker.Stop()
 			return
