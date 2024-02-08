@@ -58,3 +58,4 @@ Desktop.ini
 tmp/
 temp/
 .env
+local.Dockerfile
