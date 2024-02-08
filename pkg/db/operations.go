@@ -7,11 +7,10 @@ import (
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 )
 
-func WritePingMetricsToInfluxDB(stats *model.PingStats) {
+func WritePingMetricsToInfluxDB(stats *model.PingStats, errorChan chan<- error) {
 	// Get non-blocking write client
 	writeAPI := influxClient.WriteAPI(influxOrg, influxBucket)
 
-	// Create a point and add to batch
 	p := influxdb2.NewPointWithMeasurement("ping_metrics").
 		AddField("avg_latency_ms", stats.AvgLatency).
 		AddField("jitter_ms", stats.Jitter).
@@ -23,13 +22,18 @@ func WritePingMetricsToInfluxDB(stats *model.PingStats) {
 
 	// Flush writes
 	writeAPI.Flush()
+
+	go func() {
+		for err := range writeAPI.Errors() {
+			errorChan <- err
+		}
+	}()
 }
 
-func WritePacketInfoToInfluxDB(info *model.PacketInfo) {
+func WritePacketInfoToInfluxDB(info *model.PacketInfo, errorChan chan<- error) {
 	// Get a non-blocking write client
 	writeAPI := influxClient.WriteAPI(influxOrg, influxBucket)
 
-	// Create a new point with the measurement name
 	p := influxdb2.NewPointWithMeasurement("network_traffic").
 		AddTag("packet_type", info.PacketType).
 		AddTag("src_ip", info.SrcIP).
@@ -44,4 +48,10 @@ func WritePacketInfoToInfluxDB(info *model.PacketInfo) {
 
 	// Ensure all writes are sent
 	writeAPI.Flush()
+
+	go func() {
+		for err := range writeAPI.Errors() {
+			errorChan <- err
+		}
+	}()
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	_ "net/http/pprof" // Note the underscore, which imports the package for its side-effects only.
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,18 +15,20 @@ import (
 )
 
 func main() {
-
 	go func() {
 		log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()
 
-	// Start packet capture in its own goroutine
-	go metrics.PacketCapture()
+	// Create a channel to receive errors
+	errorChan := make(chan error)
 
 	// Setup channel to listen for termination signals
 	signals := make(chan os.Signal, 1)
-	// Notify signals channel on SIGINT and SIGTERM
+	// Notify for SIGINT and SIGTERM
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
+
+	// Start packet capture in its own goroutine
+	go metrics.PacketCapture()
 
 	host := "google.com"
 	count := 4
@@ -40,9 +42,12 @@ func main() {
 				log.Fatal(err)
 				return
 			}
-			go db.WritePingMetricsToInfluxDB(pingStats)
+			db.WritePingMetricsToInfluxDB(pingStats, errorChan)
+		case info := <-metrics.PacketInfoChan:
+			db.WritePacketInfoToInfluxDB(info, errorChan)
+		case err := <-errorChan:
+			log.Printf("Error occurred: %v", err)
 		case <-signals:
-			// Received a termination signal, perform cleanup
 			fmt.Println("Termination signal received, closing resources.")
 			db.CloseInfluxDBClient()
 			ticker.Stop()

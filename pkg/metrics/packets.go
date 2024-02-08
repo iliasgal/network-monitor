@@ -7,7 +7,6 @@ import (
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
-	"github.com/iliasgal/network-monitor/pkg/db"
 	"github.com/iliasgal/network-monitor/pkg/model"
 )
 
@@ -69,6 +68,9 @@ func (p UDPProcessor) Process(packet gopacket.Packet) *model.PacketInfo {
 	}
 }
 
+// PacketInfoChan is a buffered channel for storing packet info
+var PacketInfoChan = make(chan *model.PacketInfo, 100)
+
 func PacketCapture() {
 	device := "en0" // Change this to your network interface name
 	var snapshotLen int32 = 1024
@@ -93,7 +95,7 @@ func PacketCapture() {
 		for _, processor := range processors {
 			info := processor.Process(packet)
 			if info != nil {
-				go db.WritePacketInfoToInfluxDB(info)
+				PacketInfoChan <- info
 			}
 		}
 	}
