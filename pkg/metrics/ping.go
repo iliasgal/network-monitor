@@ -10,7 +10,7 @@ import (
 )
 
 // PingHost executes the ping command and calculates average latency, packet loss, and jitter.
-func PingHost(host string, count int) (*model.PingMetrics, error) {
+func PingHost(host string, count int) (*model.PingStats, error) {
 	cmd := exec.Command("ping", "-c", fmt.Sprint(count), host)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -30,7 +30,7 @@ func PingHost(host string, count int) (*model.PingMetrics, error) {
 	}
 
 	// write ping metrics to struct
-	pingMetrics := model.PingMetrics{
+	pingMetrics := model.PingStats{
 		AvgLatency: avgLatency,
 		Jitter:     jitter,
 		PacketLoss: packetLoss,

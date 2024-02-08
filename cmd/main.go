@@ -32,7 +32,6 @@ func main() {
 	count := 4
 	ticker := time.NewTicker(5 * time.Second) // Ping every 5 seconds
 
-	// Use a select statement to listen for events
 	for {
 		select {
 		case <-ticker.C:
@@ -41,8 +40,7 @@ func main() {
 				log.Fatal(err)
 				return
 			}
-			// Write ping metrics to InfluxDB
-			go db.WritePingMetricsToInfluxDB(pingStats.AvgLatency, pingStats.Jitter, pingStats.PacketLoss)
+			go db.WritePingMetricsToInfluxDB(pingStats)
 		case <-signals:
 			// Received a termination signal, perform cleanup
 			fmt.Println("Termination signal received, closing resources.")

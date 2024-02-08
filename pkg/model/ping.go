@@ -1,6 +1,6 @@
 package model
 
-type PingMetrics struct {
+type PingStats struct {
 	AvgLatency float64
 	Jitter     float64
 	PacketLoss float64

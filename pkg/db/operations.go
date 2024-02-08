@@ -7,15 +7,15 @@ import (
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 )
 
-func WritePingMetricsToInfluxDB(avgLatency, jitter, packetLoss float64) {
+func WritePingMetricsToInfluxDB(stats *model.PingStats) {
 	// Get non-blocking write client
 	writeAPI := influxClient.WriteAPI(influxOrg, influxBucket)
 
 	// Create a point and add to batch
 	p := influxdb2.NewPointWithMeasurement("ping_metrics").
-		AddField("avg_latency_ms", avgLatency).
-		AddField("jitter_ms", jitter).
-		AddField("packet_loss", packetLoss).
+		AddField("avg_latency_ms", stats.AvgLatency).
+		AddField("jitter_ms", stats.Jitter).
+		AddField("packet_loss", stats.PacketLoss).
 		SetTime(time.Now())
 
 	// write point asynchronously
