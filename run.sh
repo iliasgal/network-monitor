@@ -33,6 +33,7 @@ echo "Go program built successfully!"
 echo "Starting InfluxDB container..."
 docker-compose up -d influxdb
 
+# Wait for InfluxDB to start
 sleep 5
 
 echo "Running the network monitor program..."
