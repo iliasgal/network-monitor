@@ -38,7 +38,7 @@ InfluxDB is used to store and manage the network metrics captured by Network Mon
 Before running Network Monitor, configure the connection to InfluxDB through an environment file (`.env`), which is not included in the repository for security reasons. Create this file with the following contents:
 
 ```plaintext
-INFLUXDB_URL=http://localhost:8086
+INFLUXDB_URL=YourInfluxDBURL #e.g. http://localhost:8086
 INFLUXDB_ADMIN_TOKEN=YourInfluxDBToken
 INFLUXDB_ORG=YourOrganisation
 INFLUXDB_BUCKET=YourBucket

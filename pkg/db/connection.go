@@ -10,7 +10,7 @@ var (
 	influxToken  = os.Getenv("INFLUXDB_ADMIN_TOKEN")
 	influxBucket = os.Getenv("INFLUXDB_BUCKET")
 	influxOrg    = os.Getenv("INFLUXDB_ORG")
-	influxURL    = "http://localhost:8086"
+	influxURL    = os.Getenv("INFLUXDB_URL")
 )
 
 var influxClient influxdb2.Client
